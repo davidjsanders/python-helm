@@ -1,0 +1,18 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: cowbull-{{ template "cowbull.fullname" . }}-svc
+#  name: cowbull-svc
+  labels:
+    run: cowbull
+    app: cowbull
+    tier: frontend
+spec:
+  selector:
+    app: cowbull-{{ template "cowbull.fullname" . }}-srv
+    tier: frontend
+#  clusterIP: None
+  ports:
+    - protocol: TCP
+      targetPort: 8080
+      port: 8080

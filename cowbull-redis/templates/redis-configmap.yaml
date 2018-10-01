@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config-{{ template "cowbull.fullname" . }}
+  namespace: default
+data:
+  init.sh: |
+    #!/bin/bash
+    echo ""
+    echo "In init.sh"
+    echo "=========="
+    echo ""
+    if [[ ${HOSTNAME} == 'redis-{{ template "cowbull.fullname" . }}-0' ]]; then
+      echo " MASTER : Host is redis-{{ template "cowbull.fullname" . }}-0"
+      redis-server /redis-config/master.conf
+    else
+      echo " SLAVE  : Host is ${HOSTNAME}"
+      redis-server /redis-config/slave.conf
+    fi
+    echo ""
+    echo "init.sh complete"
+    echo "================"
+    echo ""
+  master.conf: |
+    bind 0.0.0.0
+    port 6379
+    dir /redis-data
+  sentinel.conf: |
+    bind 0.0.0.0
+    port 26379
+    sentinel monitor redis redis-{{ template "cowbull.fullname" . }}-0.redis-{{ template "cowbull.fullname" . }}-svc.default.svc.cluster.local 6379 2
+    sentinel parallel-syncs redis 1
+    sentinel down-after-milliseconds redis 10000
+    sentinel failover-timeout redis 20000
+  sentinel.sh: |
+    #!/bin/bash
+    echo ""
+    echo "In sentinel.sh"
+    echo "=============="
+    echo ""
+    while ! ping -c 1 redis-{{ template "cowbull.fullname" . }}-0.redis-{{ template "cowbull.fullname" . }}-svc.default.svc.cluster.local; do
+        echo 'Waiting for server redis-{{ template "cowbull.fullname" . }}-0.redis-{{ template "cowbull.fullname" . }}-svc.default.svc.cluster.local'
+        sleep 1
+    done
+    cp /redis-config/sentinel.conf ~/
+    # redis-sentinel /redis-config/sentinel.conf
+    redis-sentinel ~/sentinel.conf
+  slave.conf: |
+    bind 0.0.0.0
+    port 6379
+    dir .
+    slaveof redis-{{ template "cowbull.fullname" . }}-0.redis-{{ template "cowbull.fullname" . }}-svc.default.svc.cluster.local 6379

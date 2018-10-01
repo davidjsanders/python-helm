@@ -1,0 +1,32 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+    name: cowbull-{{ template "cowbull.fullname" . }}-config
+    namespace: default
+data:
+    cowbull.cfg: '{
+      "LOGGING_FORMAT": "%(asctime)s %(levelname)s: %(message)s ",
+      "LOGGING_LEVEL": 10,
+      "PERSISTER": {"engine_name": "redis", "parameters": {"host": "redis-{{ template "cowbull.fullname" . }}-svc.default.svc.cluster.local", "port": 6379, "master_port": 26379, "db": 0}}
+    }'
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+    name: cowbull-{{ template "cowbull.fullname" . }}-init-config
+    namespace: default
+data:
+  init.sh: |
+    #!/bin/bash
+    let endat={{ .Values.redis.replicas }}-1
+    echo "endat set to $endat"
+    echo "redis.replicas --> {{ .Values.redis.replicas }}"
+    for i in `seq 0 $endat`
+    do 
+        while ! ping -c 1 redis-{{ template "cowbull.fullname" . }}-$i.redis-{{ template "cowbull.fullname" . }}-svc.default.svc.cluster.local >& /tmp/nullout; 
+        do 
+            echo "Waiting for redis-{{ template "cowbull.fullname" . }}-$i.redis-{{ template "cowbull.fullname" . }}-svc.default.svc.cluster.local"; 
+            sleep 5; 
+        done; 
+        echo "redis-{{ template "cowbull.fullname" . }}-$i.redis-{{ template "cowbull.fullname" . }}-svc.default.svc.cluster.local ready"; 
+    done

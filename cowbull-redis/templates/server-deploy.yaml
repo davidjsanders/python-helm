@@ -1,0 +1,59 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: cowbull-{{ template "cowbull.fullname" . }}-dep
+#  name: cowbull-dep
+spec:
+  replicas: {{ .Values.backend.replicas }}
+  template: # create pods using pod definition in this template
+    metadata:
+      labels:
+        app: cowbull-{{ template "cowbull.fullname" . }}-srv
+        run: cowbull
+        tier: frontend
+    spec:
+      containers:
+      - name: cowbull
+        image: dsanderscan/cowbull
+        imagePullPolicy: Always
+        env:
+        - name: "LOGGING_LEVEL"
+          value: "10"
+        - name: "COWBULL_CONFIG"
+          value: "/cowbull/config/cowbull.cfg"
+        resources:
+          requests:
+            cpu: '0.1'
+            memory: 40Mi
+        volumeMounts:
+        - name: config-{{ template "cowbull.fullname" . }}-volume
+          mountPath: /cowbull/config/
+        - name: gcp-credentials
+          mountPath: /cowbull/secrets/
+        ports:
+        - containerPort: 8080
+      initContainers:
+      - name: init-cowbull-server
+        image: busybox
+        command: ['sh', '-c', 'if [ -e /cowbull-init/init.sh ]; then source /cowbull-init/init.sh; fi']
+        volumeMounts:
+        - mountPath: /cowbull-init
+          name: cowbull-{{ template "cowbull.fullname" . }}-init
+      volumes:
+      - name: cowbull-{{ template "cowbull.fullname" . }}-init
+        configMap:
+          name: cowbull-{{ template "cowbull.fullname" . }}-init-config
+          optional: true
+          items:
+          - key: init.sh
+            path: init.sh
+      - name: config-{{ template "cowbull.fullname" . }}-volume
+        configMap:
+          name: cowbull-{{ template "cowbull.fullname" . }}-config
+          items:
+          - key: cowbull.cfg
+            path: cowbull.cfg
+      - name: gcp-credentials
+        secret:
+          secretName: gcp-credentials
+          optional: true
