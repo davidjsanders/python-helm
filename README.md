@@ -1,2 +1,2 @@
-# python-helm
-Simple Helm
+# helm-learning
+Learning Helm
