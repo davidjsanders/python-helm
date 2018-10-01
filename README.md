@@ -1,2 +1,0 @@
-# helm-learning
-Learning Helm

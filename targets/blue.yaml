@@ -1,0 +1,44 @@
+#
+# BLUE
+# 
+
+webapp:
+  replicas: 2
+  cpu:  '0.1'
+  memory: 40Mi
+  image: 'dsanderscan/cowbull_webapp'
+  imagetag: '1.0.99'
+  logging_level: 30
+  env: 'PR-BLUE'
+  navbar_colour: 'bg-primary'
+
+appserver:
+  replicas: 3
+  logging_level: 30
+  cpu:  '0.1'
+  memory: 150Mi
+  image: 'dsanderscan/cowbull'
+  imagetag: '1.0.172'
+
+dbServer:
+  replicas: 2
+  image: 'dsanderscan/python_cowbull_redis'
+  imagetag: '4.0.6'
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

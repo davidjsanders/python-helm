@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: webapp-{{ template "cowbull.fullname" . }}-pod
 spec:
-  replicas: {{ .Values.frontend.replicas }}
+  replicas: {{ .Values.webapp.replicas }}
   template: # create pods using pod definition in this template
     metadata:
       labels:
@@ -13,21 +13,29 @@ spec:
     spec:
       containers:
       - name: webapp
-        image: {{ .Values.frontend.image }}{{ .Values.frontend.image-tag }}
+        image: {{ printf "%s:%s" .Values.webapp.image .Values.webapp.imagetag }}
         resources:
           requests:
-            cpu: {{ .Values.frontend.cpu }}
-            memory: {{ .Values.frontend.memory }}
+            cpu: {{ .Values.webapp.cpu }}
+            memory: {{ .Values.webapp.memory }}
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
         env:
         - name: LOGGING_LEVEL
-          value: "10"
+          value: "{{ .Values.webapp.logging_level }}"
         - name: COWBULL_SERVER
           value: "cowbull-{{ template "cowbull.fullname" . }}-svc"
         - name: COWBULL_PORT
           value: "8080"
-        - name: COWBULL_ENVIRONMENT
-          value: "DEV"
         - name: NAVBAR_COLOUR
-          value: "bg-secondary"
+          value: {{ printf "%s" .Values.webapp.navbar_colour }}
+        - name: COWBULL_ENVIRONMENT
+          value: {{ printf "%s" .Values.webapp.env }}
+        - name: BUILD_NUMBER
+          value: {{ printf "%s" .Values.webapp.imagetag }}
         ports:
         - containerPort: 8080

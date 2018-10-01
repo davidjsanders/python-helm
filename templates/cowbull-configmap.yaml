@@ -18,9 +18,9 @@ metadata:
 data:
   init.sh: |
     #!/bin/bash
-    let endat={{ .Values.redis.replicas }}-1
+    let endat={{ .Values.dbServer.replicas }}-1
     echo "endat set to $endat"
-    echo "redis.replicas --> {{ .Values.redis.replicas }}"
+    echo "dbServer.replicas --> {{ .Values.dbServer.replicas }}"
     for i in `seq 0 $endat`
     do 
         while ! ping -c 1 redis-{{ template "cowbull.fullname" . }}-$i.redis-{{ template "cowbull.fullname" . }}-svc.default.svc.cluster.local >& /tmp/nullout; 

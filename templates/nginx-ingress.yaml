@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-{{ template "cowbull.fullname" . }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/add-base-url: "true"
+spec:
+  backend:
+    serviceName: default-http-backend
+    servicePort: 80
+  rules:
+  - host: mkube
+    http:
+      paths:
+      - path: /{{ template "cowbull.fullname" . }}
+        backend:
+          serviceName: webapp-{{ template "cowbull.fullname" . }}-svc
+          servicePort: 8080

@@ -4,7 +4,7 @@ metadata:
   name: cowbull-{{ template "cowbull.fullname" . }}-dep
 #  name: cowbull-dep
 spec:
-  replicas: {{ .Values.backend.replicas }}
+  replicas: {{ .Values.appserver.replicas }}
   template: # create pods using pod definition in this template
     metadata:
       labels:
@@ -14,17 +14,17 @@ spec:
     spec:
       containers:
       - name: cowbull
-        image: dsanderscan/cowbull
-        imagePullPolicy: Always
+        image: {{ printf "%s:%s" .Values.appserver.image .Values.appserver.imagetag }}
+#        imagePullPolicy: Always
         env:
         - name: "LOGGING_LEVEL"
-          value: "10"
+          value: "{{ .Values.webapp.logging_level }}"
         - name: "COWBULL_CONFIG"
           value: "/cowbull/config/cowbull.cfg"
         resources:
           requests:
-            cpu: '0.1'
-            memory: 40Mi
+            cpu: {{ .Values.appserver.cpu }}
+            memory: {{ .Values.appserver.memory }}
         volumeMounts:
         - name: config-{{ template "cowbull.fullname" . }}-volume
           mountPath: /cowbull/config/

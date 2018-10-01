@@ -9,4 +9,4 @@ spec:
     name: peer
   clusterIP: None
   selector:
-    app: redis
+    app: redis-{{ template "cowbull.fullname" . }}

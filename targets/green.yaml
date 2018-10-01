@@ -1,34 +1,29 @@
-# Default values for cowbull.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+#
+# GREEN
+#
 
-replicaCount: 1
-
-frontend:
+webapp:
   replicas: 2
   cpu:  '0.1'
   memory: 40Mi
   image: 'dsanderscan/cowbull_webapp'
-  image-tag: ':latest'
+  imagetag: '1.0.28'
+  logging_level: 10
+  env: 'PR-GREEN'
+  navbar_colour: 'bg-success'
 
-backend:
+appserver:
   replicas: 3
+  logging_level: 30
+  cpu:  '0.1'
+  memory: 150Mi
+  image: 'dsanderscan/cowbull'
+  imagetag: '1.0.168'
 
-redis:
+dbServer:
   replicas: 2
-
-frontendReplicas: 3
-backendReplicas: 3
-redisReplicas: 2
-
-image:
-  repository: nginx
-  tag: stable
-  pullPolicy: IfNotPresent
-
-service:
-  type: ClusterIP
-  port: 80
+  image: 'dsanderscan/python_cowbull_redis'
+  imagetag: '4.0.6'
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

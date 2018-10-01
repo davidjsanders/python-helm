@@ -3,17 +3,16 @@ kind: StatefulSet
 metadata:
   name: redis-{{ template "cowbull.fullname" . }}
 spec:
-  replicas: {{ .Values.redis.replicas }}
-#  serviceName: redis
+  replicas: {{ .Values.dbServer.replicas }}
   serviceName: redis-{{ template "cowbull.fullname" . }}-svc
   template:
     metadata:
       labels:
-        app: redis
+        app: redis-{{ template "cowbull.fullname" . }}
     spec:
       containers:
       - command: [bash, -c, . /redis-config/init.sh]
-        image: dsanderscan/python_cowbull_redis:4.0.6
+        image: {{ printf "%s:%s" .Values.dbServer.image .Values.dbServer.imagetag }}
         name: redis
         ports:
         - containerPort: 6379
@@ -24,7 +23,7 @@ spec:
         - mountPath: /redis-data
           name: data
       - command: [bash, -c, . /redis-config/sentinel.sh]
-        image: dsanderscan/python_cowbull_redis:4.0.6
+        image: {{ printf "%s:%s" .Values.dbServer.image .Values.dbServer.imagetag }}
         name: sentinel
         volumeMounts:
         - mountPath: /redis-config
